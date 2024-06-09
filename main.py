@@ -11,11 +11,12 @@ st.title('Daily Report App')
 # サイドバーにファイルアップロード部品を移動
 st.sidebar.title('ファイルアップロード')
 uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
-# テーマの取得
-if st.get_option("theme.base") == "light":
-    theme = "ライトモード"
-else:
-    theme = "ダークモード"
+
+# テーマの設定を取得
+background_color = st.get_option("theme.backgroundColor")
+text_color = st.get_option("theme.textColor")
+secondary_background_color = st.get_option("theme.secondaryBackgroundColor")
+
 
 if uploaded_file is not None:
     try:
@@ -44,6 +45,7 @@ if uploaded_file is not None:
     if len(data) != 4:
         st.error("CSVファイルのフォーマットが正しくありません。4つのセクションが必要です。")
         st.stop()
+
     # ユーザー情報
     user_info = data['ユーザー情報']
 
@@ -68,36 +70,86 @@ if uploaded_file is not None:
     # 選択された年月の日報データを取得
     filtered_report_data = report_data[report_data['year_month']
                                        == selected_year_month]
+    # スタイルの調整を追加
+    st.markdown(f"""
+        <style>
+        .report-title {{
+            color: {text_color};
+            font-size: 24px;
+            font-weight: bold;
+        }}
+        .report-content {{
+            color: {text_color};
+            font-size: 16px;
+        }}
+        .report-label {{
+            font-weight: bold;
+            color: {text_color};
+        }}
+        .report-value {{
+            background-color: {secondary_background_color};
+            color: {text_color};
+            padding: 5px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }}
+        .inline {{
+            display: inline-block;
+            margin-right: 20px;
+        }}
+        .comment-section {{
+            background-color: {secondary_background_color};
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border: 1px solid {text_color};
+        }}
+        .comment {{
+            background-color: {secondary_background_color};
+            color: {text_color};
+            padding: 5px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }}
+        </style>
+        """, unsafe_allow_html=True)
 
     # 日報データの表示
     for _, report in filtered_report_data.iterrows():
-        # 区切り線と背景色を追加
-     # 区切り線と背景色を追加
-        st.markdown("---")
-        st.markdown(f"### {report['title']}")
-        st.markdown(f"**日付:** {report['date'].strftime('%Y-%m-%d')}")
-        st.markdown(f"**概要:** {report['summary']}")
-        st.markdown(f"**コンディション:** {report['condition']}")
-        st.markdown("**内容**")
+        st.markdown(
+            f"<div class='report-title'>{report['title']}</div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='inline'><span class='report-label'>日付:</span> <span class='report-value'>{report['date'].strftime('%Y-%m-%d')}</span></div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='inline'><span class='report-label'>作成日時:</span> <span class='report-value'>{report['created_at']}</span></div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='inline'><span class='report-label'>更新日時:</span> <span class='report-value'>{report['updated_at']}</span></div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='report-label'>概要:</div> <div class='report-value'>{report['summary']}</div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='report-label'>コンディション:</div> <div class='report-value'>{report['condition']}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='report-label'>内容:</div>",
+                    unsafe_allow_html=True)
         if pd.notnull(report['report']):
-            st.markdown(f"{report['report']}")
+            st.markdown(
+                f"<div class='report-value'>{report['report']}</div>", unsafe_allow_html=True)
         else:
-            st.markdown("")
-        st.markdown(f"")
+            st.markdown(f"<div class='report-value'></div>",
+                        unsafe_allow_html=True)
         if pd.notnull(report['info']):
-            st.markdown(f"**連絡事項:** {report['info']}")
+            st.markdown(
+                f"<div class='report-label'>連絡事項:</div> <div class='report-value'>{report['info']}</div>", unsafe_allow_html=True)
         else:
-            st.markdown(f"**連絡事項:** -")
-        st.markdown(f"**作成日時:** {report['created_at']}")
-        st.markdown(f"**更新日時:** {report['updated_at']}")
+            st.markdown(
+                f"<div class='report-label'>連絡事項:</div> <div class='report-value'>-</div>", unsafe_allow_html=True)
 
-        # コメントの表示
-        st.markdown("#### コメント")
+        st.markdown("#### コメント", unsafe_allow_html=True)
         report_comments = comment_data[comment_data['report_id']
                                        == report['id']]
         for _, comment in report_comments.iterrows():
             user_name = user_master[user_master['id']
                                     == comment['user_id']]['name'].values[0]
             st.markdown(
-                f"{user_name} ({comment['created_at']}): {comment['text']}")
+                f"<div class='comment'>{user_name} ({comment['created_at']}): {comment['text']}</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown('---')
