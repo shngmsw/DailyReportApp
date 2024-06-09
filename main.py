@@ -1,3 +1,4 @@
+import re
 from io import StringIO
 
 import pandas as pd
@@ -21,7 +22,7 @@ if uploaded_file is not None:
         # CSVファイルの読み込み
         file_content = uploaded_file.read().decode("utf-8")
         # セクションごとに分割
-        sections = file_content.split("##")
+        sections = re.split(r'^##\s+', file_content, flags=re.MULTILINE)
         # 各セクションを処理
         data = {}
         for section in sections:
