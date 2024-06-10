@@ -13,9 +13,9 @@ st.sidebar.title('ファイルアップロード')
 uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
 
 # テーマの設定を取得
-background_color = st.get_option("theme.backgroundColor")
-text_color = st.get_option("theme.textColor")
-secondary_background_color = st.get_option("theme.secondaryBackgroundColor")
+background_color = "#121212"
+text_color = "#FFFFFF"
+secondary_background_color = "#262730"
 
 
 if uploaded_file is not None:
